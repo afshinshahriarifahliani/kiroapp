@@ -14,6 +14,7 @@ data class TimerUiState(
     val completedFocusSessions: Int = 0,
     val availablePresets: List<TimerPreset> = TimerPreset.defaults,
     val soundscape: Soundscape = Soundscape.NONE,
+    val soundEnabled: Boolean = true,
     val isPro: Boolean = false,
 ) {
     val progress: Float

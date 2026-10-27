@@ -84,10 +84,16 @@ fun EmberFocusApp() {
                 TimerRoute(onRequestPro = { navController.navigate(ROUTE_PAYWALL) })
             }
             composable(TopDestination.HABITS.route) {
-                HabitsScreen(modifier = Modifier.fillMaxSize())
+                HabitsScreen(
+                    onOpenPaywall = { navController.navigate(ROUTE_PAYWALL) },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             composable(TopDestination.STATS.route) {
-                StatsScreen(modifier = Modifier.fillMaxSize())
+                StatsScreen(
+                    onOpenPaywall = { navController.navigate(ROUTE_PAYWALL) },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             composable(TopDestination.SETTINGS.route) {
                 SettingsScreen(onOpenPaywall = { navController.navigate(ROUTE_PAYWALL) })

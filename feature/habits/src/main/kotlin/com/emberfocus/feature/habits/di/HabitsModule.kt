@@ -5,5 +5,5 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val habitsModule = module {
-    viewModel { HabitsViewModel(get()) }
+    viewModel { HabitsViewModel(get(), get()) }
 }

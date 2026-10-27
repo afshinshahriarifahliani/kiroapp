@@ -22,6 +22,7 @@ data class StatsUiState(
     val weekBars: List<DayBar> = emptyList(),
     val isPro: Boolean = false,
     val recent: List<FocusSession> = emptyList(),
+    val hasMoreHistory: Boolean = false,
 )
 
 class StatsViewModel(
@@ -58,7 +59,8 @@ class StatsViewModel(
             todayMinutes = byDay[today].orEmpty().sumOf { it.durationMinutes },
             weekBars = bars,
             isPro = isPro,
-            recent = sessions.take(20),
+            recent = sessions.take(com.emberfocus.core.model.ProLimits.sessionHistoryLimit(isPro).coerceAtMost(50)),
+            hasMoreHistory = !isPro && sessions.size > com.emberfocus.core.model.ProLimits.FREE_SESSION_HISTORY,
         )
     }
 }

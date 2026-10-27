@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.emberfocus.core.data.PreferencesRepository
 import com.emberfocus.core.data.SessionRepository
 import com.emberfocus.core.model.Soundscape
+import com.emberfocus.feature.timer.audio.SoundscapeController
 import com.emberfocus.core.model.TimerPhase
 import com.emberfocus.core.model.TimerPreset
 import com.emberfocus.core.model.TimerStatus
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class TimerViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val sessionRepository: SessionRepository,
+    private val soundscapeController: SoundscapeController,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TimerUiState())
@@ -44,8 +46,14 @@ class TimerViewModel(
                         remainingSeconds = if (applyPreset) preset.focusMinutes * 60 else current.remainingSeconds,
                         totalSeconds = if (applyPreset) preset.focusMinutes * 60 else current.totalSeconds,
                         soundscape = prefs.selectedSoundscape,
+                        soundEnabled = prefs.soundEnabled,
                         isPro = prefs.isPro,
                     )
+                }
+                // Keep live playback in sync with preference changes while running.
+                val s = _state.value
+                if (s.status == TimerStatus.RUNNING) {
+                    soundscapeController.apply(s.soundscape, s.soundEnabled, s.isPro)
                 }
             }
         }
@@ -75,6 +83,7 @@ class TimerViewModel(
         }
         deadlineMs = System.currentTimeMillis() + s.remainingSeconds * 1000L
         _state.update { it.copy(status = TimerStatus.RUNNING) }
+        soundscapeController.apply(s.soundscape, s.soundEnabled, s.isPro)
         tickJob?.cancel()
         tickJob = viewModelScope.launch {
             while (true) {
@@ -92,11 +101,13 @@ class TimerViewModel(
 
     private fun pause() {
         tickJob?.cancel()
+        soundscapeController.stop()
         _state.update { it.copy(status = TimerStatus.PAUSED) }
     }
 
     private fun reset() {
         tickJob?.cancel()
+        soundscapeController.stop()
         _state.update {
             val total = secondsFor(it.preset, it.phase)
             it.copy(status = TimerStatus.IDLE, remainingSeconds = total, totalSeconds = total)
@@ -120,6 +131,7 @@ class TimerViewModel(
 
     private fun advancePhase(completed: Boolean) {
         tickJob?.cancel()
+        soundscapeController.stop()
         _state.update { current ->
             val wasFocus = current.phase == TimerPhase.FOCUS
             val completedSessions =
@@ -157,6 +169,10 @@ class TimerViewModel(
 
     private fun selectSoundscape(soundscape: Soundscape) {
         _state.update { it.copy(soundscape = soundscape) }
+        val s = _state.value
+        if (s.status == TimerStatus.RUNNING) {
+            soundscapeController.apply(soundscape, s.soundEnabled, s.isPro)
+        }
         viewModelScope.launch { preferencesRepository.setSoundscape(soundscape) }
     }
 
@@ -169,6 +185,7 @@ class TimerViewModel(
     override fun onCleared() {
         super.onCleared()
         tickJob?.cancel()
+        soundscapeController.stop()
     }
 }
 

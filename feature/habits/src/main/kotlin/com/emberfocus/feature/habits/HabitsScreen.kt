@@ -56,17 +56,25 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitsScreen(
+    onOpenPaywall: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HabitsViewModel = koinViewModel(),
 ) {
-    val habits by viewModel.habits.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val habits = uiState.habits
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.limitReached.collect { onOpenPaywall() }
+    }
 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = { showSheet = true }) {
+            FloatingActionButton(onClick = {
+                if (viewModel.shouldUpsell()) onOpenPaywall() else showSheet = true
+            }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add habit")
             }
         },

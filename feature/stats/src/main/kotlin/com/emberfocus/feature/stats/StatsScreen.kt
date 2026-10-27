@@ -1,5 +1,6 @@
 package com.emberfocus.feature.stats
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun StatsScreen(
+    onOpenPaywall: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StatsViewModel = koinViewModel(),
 ) {
@@ -76,6 +78,27 @@ fun StatsScreen(
                             )
                         }
                         Text("🔥", style = MaterialTheme.typography.titleLarge)
+                    }
+                }
+            }
+            if (state.hasMoreHistory) {
+                EmberCard(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenPaywall() },
+                ) {
+                    Column {
+                        Text(
+                            "See your full history with Pro",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            "Free shows your last ${state.recent.size} sessions. Unlock complete insights.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
