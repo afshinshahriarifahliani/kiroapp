@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warm sand background to match the light Compose theme; avoids a white launch flash. -->
+    <color name="ember_window_background">#FFFBF7</color>
+    <color name="ic_launcher_background">#F2611C</color>
+</resources>
